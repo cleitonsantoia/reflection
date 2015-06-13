@@ -1,0 +1,34 @@
+\rSec0[type.traits]{Type traits}
+\begin{enumerate}
+\item First some unary type traits:
+\begin{enumerate}
+\item \tcode{std::is_constexpr<D>} returns true if declaration D is marked as constexpr.
+\item \tcode{std::is_extern<D>} returns true if declaration D is marked as extern.
+\item \tcode{std::is_explicit<F>} returns true if function F is marked as explicit.
+\item \tcode{std::is_export<D>} return true if declaration D is marked as export.
+\item \tcode{std::is_final<D>} return true if declaration D is marked as final.
+\item \tcode{std::is_inline<F>} return true if function F is marked as inline.
+\item \tcode{std::is_lambda<T>} return true if the class T is a lambda.
+\item \tcode{std::is_local<T>} return true if the class is a local class ( defined inside a function ).
+\item \tcode{std::is_mutable<M>} return true if member M is marked as mutable.
+\item \tcode{std::is_override<F>} return true if function F is marked as override.
+\item \tcode{std::is_pure_virtual<F>} return true if the function F is a pure virtual function.
+\item \tcode{std::is_private<M>} return true if member M is inside a private scope.
+\item \tcode{std::is_protected<M>} return true if member M is inside a protected scope.
+\item \tcode{std::is_public<M>} return true if member M is inside a public scope.
+\item \tcode{std::is_thread_local<V>} return true if variable V is has a thread local defined. 
+\item \tcode{std::is_overload<F>} return true if function F has some overload.
+\item \tcode{std::is_virtual<F>} return true if function F is virtual.
+\end{enumerate}
+For all unary type traits, one can use them directly in \tcode{typedef<T, C>...}
+\item Then some binary template predicates:
+\begin{enumerate}
+\item \tcode{std::has_attribute<D, A>} returns a 
+\item \tcode{std::is_direct_base_of<Base,Derived>} return true if class ``Base'' is a direct base class of ``Derived''. \item \tcode{std::is_friend<T,U>} return true if type T is declared as friend of U.
+\item \tcode{std::is_private_base_of<Base,Derived>} return true if class ``Base'' is a private base class of ``Derived''.
+\item \tcode{std::is_protected_base_of<Base,Derived>} return true if class ``Base'' is a protected base class of ``Derived''.
+\item \tcode{std::is_public_base_of<Base,Derived>} return true if class ``Base'' is a public base class of ``Derived''.
+\item \tcode{std::is_virtual_base_of<Base,Derived>} return true if class ``Base'' is a virtual base class of ``Derived''.
+\end{enumerate}
+For all binary type traits it's expected to have a specialization when the user give one parameter and a definition of a template \tcode{template<typename T> constexpr bool operator()(T\& t) {}} that checks the predicate to the elements of \tcode{typedef<T, C>...} in the way that is possible to ask for \tcode{typedef<T, has_attribute<atrib_name>...}.
+\end{enumerate}

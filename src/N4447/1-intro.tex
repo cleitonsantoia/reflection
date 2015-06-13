@@ -1,0 +1,53 @@
+\rSec0[revision]{Revision history}
+\begin{itemize}
+\item Change the layout of the document to more C++ standard
+\item Changed the meaning of \texttt{typename<T, C>} to type-list
+\item Introduce \texttt{typeid<T, C>} in replacement of \texttt{typename<T, C>}
+\item Changed \tcode{requires} by \tcode{,}
+\item Address private access problem
+\item Explain more why is important to reflect namespaces and modules
+\item Resume some parts ( but still a big document )
+\item Changes in impact
+\item Merged with attribute proposal N3984 ( typed attributes )
+\item Merged with new type traits proposal N3987 ( type traits )
+\end{itemize}
+\rSec0[intro]{Intro}
+\begin{enumerate}
+\item Overview of the new three instructions:
+\begin{itemize}
+\item \texttt{typedef<T, C>} that expands the definition of type T into a parameter back instantiation. 
+\item \texttt{typename<T, C>} that expands types of the definition of type T into a parameter back. 
+\item \texttt{typeid<T, C>} that expands members names of type T into a parameter back instantiation. 
+\end{itemize}
+\item Simple Sample Code
+\begin{codeblock}
+using namespace std;
+namespace ns {
+ struct X {
+  int x, y;
+ };
+}
+
+std::vector<std::string> names{ typeid<ns::X, is_member_object_pointer>... };
+std::tuple<typename<ns::X, is_member_object_pointer>...>
+     mytuple = std::make_tuple(typedef<ns::X, is_member_object_pointer>...);
+
+\end{codeblock}
+\item Compiler will turn the last two lines into this:
+\begin{codeblock}
+vector<string> names { "x","y" };
+std::tuple<ns::X::int, ns::X::int>
+       mytuple = std::make_tuple(
+                &ns::some_struct::x,
+                &ns::some_struct::y);
+\end{codeblock}
+\item What it's not:
+\begin{itemize}
+	\item we don't need no new keywords
+	\item we don't need no AST control
+	\item no magic namespaces or runtime structs
+	\item not an as-if-lib approach
+	\item all we need by now just another syntax keywords
+\end{itemize}
+\item That's it.
+\end{enumerate}

@@ -1,0 +1,147 @@
+\rSec1[typedef.return]{Returns of \tcode{typedef<T>... } }
+\begin{enumerate}
+\item For each class T, the types of \tcode{typedef<T>...} should be:
+\begin{enumerate}
+\item first the pointer type to class itself; 
+\end{enumerate}
+\item The following items in order of appearance in the class
+\begin{enumerate}
+\item the pointer types of its direct base classes;
+\item types of the member objects pointers;
+\item types of the member functions pointers; 
+\item types of the static member objects pointers;
+\item types of the static member functions pointers; 
+\item the pointer types to typedefs;
+\item the pointer types to inner classes;
+\item lambda types for constructors;
+\item lambda types destructor;
+\item the pointer types enumerations;
+\item attribute types.
+\end{enumerate}
+\item For each class T, the values of \tcode{typedef<T>...} should be:
+\begin{enumerate}
+\item first the nullptr pointer to class type; 
+\end{enumerate}
+\begin{enumerate}
+\item nullptr for each base classes;
+\item value of the member objects pointers;
+\item value of the member functions pointers; 
+\item value of the static member objects pointers;
+\item value of the static member functions pointers; 
+\item nullptr for typedefs;
+\item nullptr for inner classes;
+\item lambda constructors;
+\item lambda destructor;
+\item nullptr for enumerations;
+\item instances of the attributes.
+\end{enumerate}
+\item Since C++ standard says that we cannot get constructor address, cleverly ( bad cleverly ), they can be reflected by lambda proxies; A lambda function with a \tcode{operator()} overload for each constructor of T.
+
+\begin{enumerate}
+\item For each namespace T, the types of \tcode{typedef<T>...} should be:
+\begin{enumerate}
+\item the pointer type to classes/enums/unions/typedef of the namespace and it's inner namespaces;
+\item the pointer type to each namespace-level function; 
+\item the pointer type to each namespace-level variable; 
+\item the pointer type to each namespace-level constant; 
+\end{enumerate}
+\end{enumerate}
+
+\begin{enumerate}
+\item For each namespace T, the values of \tcode{typedef<T>...} should be:
+\begin{enumerate}
+\item nullptr to classes/enums/unions/typedef of the namespace and it's inner namespaces;
+\item the pointer to each namespace-level function; 
+\item the pointer to each namespace-level variable; 
+\item the pointer to each namespace-level constant; 
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+
+\rSec1[typename.return]{Returns of \tcode{typename<T>... } }
+\begin{enumerate}
+\item For each class T, the types of \tcode{typename<T>...} should be:
+\begin{enumerate}
+\item type to class itself; 
+\item types of its direct base classes;
+\item types of the member objects pointers;
+\item types of the member functions pointers; 
+\item types of the static member objects pointers;
+\item types of the static member functions pointers; 
+\item types to typedefs;
+\item types to inner classes;
+\item lambda types for constructors;
+\item lambda types destructor;
+\item the pointer types enumerations;
+\item attribute types.
+\end{enumerate}
+\end{enumerate}
+
+\rSec1[typeid.return]{Returns of \tcode{typeid<T>... } }
+
+\begin{enumerate}
+\item For each class T, the types of \tcode{typeid<T>...} should be:
+\begin{enumerate}
+\item name of the class itself; 
+\item name of the direct base classes;
+\item name of types of the member objects pointers;
+\item name of types of the member functions pointers; 
+\item name of types of the static member objects pointers;
+\item name of types of the static member functions pointers; 
+\item name of types to typedefs;
+\item name of types to inner classes;
+\item name of constructors;
+\item name of destructor;
+\item name of the enumerations;
+\item name of attribute types.
+\end{enumerate}
+
+\item The general rules for returned values are that types, classes, enums and unions it returns the fully qualified names ( if defined in the global namespace the namespace name is``::''), but for members, only it's names;
+\item For member operators values, \tcode{typeid<T>...} returns \tcode{operator@}, for \tcode{X operator+(X x) const} the result should be ``operator+'' without spaces; 
+\item For member cast operators values, \tcode{typeid<T>...} returns \tcode{operator @}, for \tcode{operator Y(X x) const} the result should be ``operator Y'' with a space; 
+\item For non member operators values, \tcode{typeid<T>...} returns \tcode{operator@}, for \tcode{::operator+(X x, X x)} the result should be ``operator+'' without spaces; 
+\end{enumerate}
+
+\rSec1[function.return]{Returns of \tcode{typename<T>,typeid<T>} for functions}
+\begin{enumerate} 
+\item Global function arguments will be reflected is this order: 
+\begin{enumerate}
+\item \tcode{typeid<T>...} returns first the name of function prefixed with ``::'', than the parameter names;
+\item \tcode{typename<T>...} returns the type of return of function than the types of parameters; 
+\end{enumerate}
+\item Non member function arguments will be reflected is this order: 
+\begin{enumerate}
+\item \tcode{typeid<T>...} returns first the name of function prefixed with namespace name, than the parameter names;
+\item \tcode{typename<T>...} returns the type of return of function than the types of parameters; 
+\end{enumerate}
+\item Member function arguments will be reflect is this order:
+\begin{enumerate}
+\item \tcode{typeid<T>...} returns first the name of function unqualified, than the class name where the function is defined, than the parameter names;
+\item \tcode{typename<T>...} returns type of return of function, than the class that the function is enclosed together with the constness or ref. signature of the function, than the types of parameters.
+\end{enumerate}
+\item Static member function arguments will be reflect is this order:
+\begin{enumerate}
+\item \tcode{typeid<T>...} returns first the name of function unqualified inside the class, than the parameter names; \item \tcode{typename<T>...} gets the type of return of function than, than the types of parameters;
+\end{enumerate}
+\item Constructors will be reflect is this order:
+\begin{enumerate}
+\item \tcode{typeid<T>...} returns first the name of class unqualified, than the parameter names;
+\item \tcode{typename<T>...} gets the type of of the class, the types of parameters;
+\end{enumerate}
+
+\item For non member functions argument T \tcode{typeid<T>...} returns the name of the function prefixed with it's namespace or ``::'' if it's a global function, without parentheses and without any noexcept/exception declaration or inline or other modifiers, only the qualified name of the function, then the names of each parameter. for a functin foo() in the namespace ns, \tcode{typeid<ns::foo>...} will return ``ns::foo'';
+\item For member function arguments T \tcode{typeid<T>...} returns the qualified name of the function, without parentheses and without any noexcept/exception declaration or inline or other modifiers like virtual or public or protected constness or volatile, etc..., only the unqualified name of the function, then the names of each parameter;
+\end{enumerate}
+
+\rSec1[primary.return]{Returns of \tcode{typename<T>,typeid<T>} for primary types}
+\begin{enumerate}
+\item For primary types, \tcode{typename<T>...} will get cast operators, common operators, constructors and destructors, casts to convertible types must appear as well, if you call \tcode{typename<int>...} must receive cast operators to double/float/long... etc. 
+\begin{itemize}
+\item \tcode{typename<void>...} this should not return any data members neither function members, only the constructor and also void should be only ``incomplete type'' allowed;
+\item \tcode{typename<nullptr\_t>...} this should not return any data members neither function members, may be not even constructors here;
+\item \tcode{typename<T*>...} this should return assignment operators, dereference operator*, ++,-- and conversions from it to it's base classes, but not return any members of T;
+\item \tcode{typename<const T*>...} this should return same as \tcode{typename<T*>...} ++, -- and dereference operator* changed to const, conversions from it to it's base const classes;
+\end{itemize}
+\item For primary type argument \tcode{typeid<T>...} returns the name of the type unqualified, and operators as ``operator+'' without spaces;
+\end{enumerate}
+

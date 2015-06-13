@@ -1,0 +1,37 @@
+\BOOKMARK [0][-]{section*.1}{Contents}{}% 1
+\BOOKMARK [0][-]{chapter.1}{1 Revision history}{}% 2
+\BOOKMARK [0][-]{chapter.2}{2 Intro}{}% 3
+\BOOKMARK [0][-]{chapter.3}{3 Motivation}{}% 4
+\BOOKMARK [0][-]{chapter.4}{4 Impact on Standard}{}% 5
+\BOOKMARK [1][-]{section.4.1}{4.1 Impact of reflection}{chapter.4}% 6
+\BOOKMARK [1][-]{section.4.2}{4.2 Impact of attributes}{chapter.4}% 7
+\BOOKMARK [0][-]{chapter.5}{5 Design}{}% 8
+\BOOKMARK [1][-]{section.5.1}{5.1 Guidelines}{chapter.5}% 9
+\BOOKMARK [1][-]{section.5.2}{5.2 Overview of typedef<T, C>...}{chapter.5}% 10
+\BOOKMARK [1][-]{section.5.3}{5.3 Overview of typename<T, C>...}{chapter.5}% 11
+\BOOKMARK [1][-]{section.5.4}{5.4 Overview of typeid<T, C>...}{chapter.5}% 12
+\BOOKMARK [1][-]{section.5.5}{5.5 Minimalist and orthogonal}{chapter.5}% 13
+\BOOKMARK [1][-]{section.5.6}{5.6 Constraints}{chapter.5}% 14
+\BOOKMARK [1][-]{section.5.7}{5.7 Type traits}{chapter.5}% 15
+\BOOKMARK [1][-]{section.5.8}{5.8 Private access}{chapter.5}% 16
+\BOOKMARK [1][-]{section.5.9}{5.9 Compatibility}{chapter.5}% 17
+\BOOKMARK [1][-]{section.5.10}{5.10 T in typedef<T,C>, typename<T,C> and typeid<T,C> }{chapter.5}% 18
+\BOOKMARK [1][-]{section.5.11}{5.11 T in typename<T,C> and typeid<T,C> }{chapter.5}% 19
+\BOOKMARK [1][-]{section.5.12}{5.12 Returns of typedef<T>... \040}{chapter.5}% 20
+\BOOKMARK [1][-]{section.5.13}{5.13 Returns of typename<T>... \040}{chapter.5}% 21
+\BOOKMARK [1][-]{section.5.14}{5.14 Returns of typeid<T>... \040}{chapter.5}% 22
+\BOOKMARK [1][-]{section.5.15}{5.15 Returns of typename<T>,typeid<T> for functions}{chapter.5}% 23
+\BOOKMARK [1][-]{section.5.16}{5.16 Returns of typename<T>,typeid<T> for primary types}{chapter.5}% 24
+\BOOKMARK [0][-]{chapter.6}{6 Attributes}{}% 25
+\BOOKMARK [1][-]{section.6.1}{6.1 Intro to attributes}{chapter.6}% 26
+\BOOKMARK [1][-]{section.6.2}{6.2 Typed attributes}{chapter.6}% 27
+\BOOKMARK [1][-]{section.6.3}{6.3 Attribute Instances}{chapter.6}% 28
+\BOOKMARK [1][-]{section.6.4}{6.4 Which attributes attachment can be reflected}{chapter.6}% 29
+\BOOKMARK [1][-]{section.6.5}{6.5 More complete examples}{chapter.6}% 30
+\BOOKMARK [2][-]{subsection.6.5.1}{6.5.1 Property idiom}{section.6.5}% 31
+\BOOKMARK [2][-]{subsection.6.5.2}{6.5.2 Attribute Idioms}{section.6.5}% 32
+\BOOKMARK [0][-]{chapter.7}{7 Type traits}{}% 33
+\BOOKMARK [0][-]{chapter.8}{8 Technical Specification}{}% 34
+\BOOKMARK [0][-]{chapter.9}{9 Acknowledgments}{}% 35
+\BOOKMARK [1][-]{section.9.1}{9.1 Few acks}{chapter.9}% 36
+\BOOKMARK [0][-]{section*.3}{Bibliography}{}% 37

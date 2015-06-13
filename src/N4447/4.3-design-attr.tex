@@ -1,0 +1,120 @@
+\rSec0[attributes]{Attributes}
+\rSec1[attributes.intro]{Intro to attributes}
+\Cpp reflection mechanism could benefit from a more complete set o functionality, if we define how to reflect attributes as well as types. This proposal main idea is to make attributes typed, and use the standard attribute syntax \tcode{[[]]} to attachment but, instead of attach a typed attribute to a target, we propose to attach a constexpr instance of a type (as an attribute) to a target. After that, we also propose to reflect them using the syntax \tcode{typedef<T, C>} and \tcode{typename<T,C>...} to get attributes of type \tcode{T}, restricted by constexpr \tcode{bool} function C. However, by current standard, the compiler implementers and vendors are free to use any tokens they need, including keywords. Make attributes typed will lead to some problems, and we show some ways to address them. But before that, let's introduce an easy \emph{Get and Set} idiom example:
+\begin{codeblock}
+struct serializable {
+};
+
+struct getter { 
+ const char* name;
+};
+
+struct setter { 
+ const char* name;
+};
+
+namespace 
+struct [[serializable]] X {
+private:
+ int index_;
+public:
+ [[getter{"index"}]] int index() const { return index_; }
+ [[setter{"index"}]] void set_index(int i) { index_ = i; }
+};
+
+serializable ser =typedef<X, has_attribute<serializable>>...; // get class attribute
+getter g = typedef<&X::index, has_attribute<getter>)...;      // member attribute
+setter s = typedef<&X::set_index, has_attribute<setter>)...;  // member attribute
+\end{codeblock}
+
+\rSec1[attributes.typed]{Typed attributes}
+Among few other problems, attributes are not typed nor part of type system, characteristic they share with macros and throws specification. These two features of C++ become deprecated over the years for different reasons, but not participate in type system is their common problem. So the propose is about tree things:
+\begin{itemize}
+\item Turn attributes into typed attributes; 
+\item Allow any type to be attached to target. The way of attachment is the usual general attribute \texttt{[[]]}
+ syntax as defined in \tcode{[dcl.attr.grammar]}.
+\item Retrieve them via reflection \tcode{typedef<T, has_atribute<A>>...} syntax.
+\end{itemize}
+\rSec1[design.instances]{Attribute Instances}
+Since attributes will be typed, we will attach an instance of an attribute type to a target type, instantiate it at compile time. So \tcode{[[A]]} is not a typed attribute ``A'' anymore, but it becomes a constexpr instance of type A, and constructing A using the syntax of standard initialization, we can keep attribute attachment short like this:\\
+\enterexample
+\begin{codeblock}
+class A {
+ int x; 
+ int y;
+};
+class [[A{10,20}]] T {
+};
+\end{codeblock}
+\exitexample
+\rSec1[design.attachment]{Which attributes attachment can be reflected}
+Not all attribute can be reflected, since not all attachments occurs in classes or typed items, we must define which cases is possible to reflect attributes.
+\begin{itemize}
+\item classes
+\item class members ( classes, enums, object members and function members, including constructors and destructors )
+\item functions
+\item lambda types
+\item parameters of functions
+\end{itemize}
+\rSec1[design.complete]{More complete examples}
+\rSec2[design.complete.property]{Property idiom}
+By the end let's show a sample implementation of a \emph{Property} idiom:
+\begin{codeblock}
+struct serializable {};
+struct desc { const char* description; };
+struct getter { const char* name; };
+struct setter { const char* name; };
+
+template< typename _Reader, typename _Writer, typename _Notifier >
+struct prop {
+ const char* name;
+ _Reader reader;
+ _Writer writer;
+ _Notifier notifier;
+ constexpr prop(const char* nm, _Reader r, _Writer w, _Notifier n)
+  : name(nm), reader(r), writer(w), notifier(n) {}
+};
+
+class [[serializable]] X {
+private:
+
+ [[getter{"index"}]] int index_; // it is a member attribute
+ [[setter{"index"}]] void set_index(int i) { index_ = index; }
+
+ enum Status {
+  Half_empty [[desc{"It's about a half"}]],
+  Half_full  [[desc{"Optimistic approach to half"}]]
+ };
+
+ int val_;
+ virtual void notifier() = 0;
+
+public:
+ void set_val(int v) { val_ = val; }
+ [[ prop("val", val_, set_val, notifier) ]]; // it is a class attribute
+};
+
+auto mytuple = make_tuple(typedef<X, has_attribute_prop>...);
+/* auto mytuple =
+     make_tuple(serializable(), 
+                prop("val", &X::val_, &X::set_val, &X::notifier));
+*/
+\end{codeblock}
+\rSec2[design.complete.idioms]{Attribute Idioms}
+Just to show how things can get complicated fast, by the definition of standard, the placement of an attribute attachment can occurs after the template definition of a class declaration, and now being part of the name look-up, it's possible to create an analogue of \emph{CRTP} a Curious Recurrent Attribute Pattern\footnote{Avoid the anachronism}:
+\begin{codeblock}
+template<typename T> struct A {};
+class C [[A<C>]] {};
+\end{codeblock}
+Just for fun let's show another few more idioms:
+\begin{codeblock}
+template<typename ...T> class Mixim [[T()...]] {};
+
+struct A { template<typename ...T> A(const T&...t) {} };
+struct B {};
+class VariadicCtor [[A(10, 20, 30, 1.0, B(), "what was that?")]] {};
+
+struct X {};
+struct Y [[X]] {};
+struct Z [[Y]] {}; // Y is an attribute that has attributes
+\end{codeblock}

@@ -1,0 +1,194 @@
+\rSec0[design]{Design}
+\rSec1[guidelines]{Guidelines}
+\begin{enumerate}
+\item Allow all types as parameters a.k.a. \tcode{typedef<int>} or \tcode{typedef<std::printf>} should not break anything.
+\item Allow not typed parameters a.k.a. \tcode{typedef<namespace>} and \tcode{typedef<module>}.
+\item Allow to choose what to get a.k.a. \tcode{typedef<T, is_member>}.
+\item Allow automatic ``search'' for classes via \tcode{typedef<namespace>} a.k.a. \tcode{class.forName()}.
+\item Allow intended access to private parts, but not accidentally.
+\end{enumerate}
+To fulfill this guidelines we considered the instructions \tcode{typename<T, C>...}, \tcode{typedef<T, C>...} and \tcode{typeid<T, C>...}>, where C is a concept, a typename or a template parameter, that provides a boolean constexpr function call operator() template, that will be applied to each element of T, to choose if it will be retrieved or not.
+\rSec1[typedef]{Overview of \tcode{typedef<T, C>...}}
+\begin{enumerate}
+\item We propose to gather from a type T, base classes, members functions, members objects, member enums, member typedefs, member classes, member constants, instantiated member templates and attributes restricted by a predicate.
+\item Here some examples of type parameter.  
+\begin{floattable}{Get some items from a class T}{tab:get.some.from.T}
+{ll}
+\topline
+member functions of T               & \tcode{typedef<T, is_member_function_pointer>}        \\
+member enums of  T                  & \tcode{typedef<T, is_enum>}                           \\
+member classes of  T                & \tcode{typedef<T, is_member_class>}                   \\
+member arithmetic consts of T       & \tcode{typedef<T, is_const \&\& is_arithmetic>}       \\
+parent classes of T                 & \tcode{typedef<T, is_derived<T> >}                    \\
+only private members of T           & \tcode{typedef<T, is_private \&\& is_member_pointer>} \\
+\end{floattable}
+\item Some examples of non-type parameter.  
+\begin{floattable}{Get some items from non-type T}{tab:get.some.from.non.type.T}
+{ll}
+\topline
+functions of namespace N            & \tcode{typedef<N, is_function>}  \\
+classes of namespace N              & \tcode{typedef<N, is_class>}     \\
+classes of module M                 & \tcode{typedef<M, is_class>}     \\
+classes of namespace N that are     & \tcode{typedef<N, your_foo>}     \\
+inherited from Factory class and    &                                  \\
+which name starts with TFac and     &                                  \\
+in singleton and have the           &                                  \\
+attribute [[pimpl]] attached        &                                  \\
+\end{floattable} 
+\item Some reflection frameworks that allows \tcode{class.for_name(std::string)} idiom, need you to register each class that will be available into the reflection library. Gather information of a namespace allows automatic registration, avoiding boring, error prone, and static fiasco problems. You can just attach an attribute to your class definition and your favored reflection framework will search for you in the correct moment.
+\item Another use for it is a concept checker, if you need to ensure a concept over a class, but you must wait until all member (classes and functions) template instantiations occurs.
+\item \tcode{typedef<T,C>} may appear in same context as an instantiation of a pack expansion, as 14.5.3.7 \cite[N4296]{N4296}
+\end{enumerate}
+
+\rSec1[typename]{Overview of \tcode{typename<T, C>...}}
+\begin{enumerate}
+\item Must be the same order than \tcode{typedef<T, C>...}
+\item Brings the types of the elements of \tcode{typedef<T, C>...}, except for classes, unions and enums that, contrary to \tcode{typedef<T, C>...} ( which brings pointers ), \tcode{typename<T, C>...} brings ``directly'' types;
+\item \tcode{typename<T,C>} may appear in same context as a pack expansion, as 14.5.3.4 \cite[N4296]{N4296}
+\end{enumerate}
+
+\rSec1[typeid]{Overview of \tcode{typeid<T, C>...}}
+\begin{enumerate}
+\item Must be the same order than \tcode{typedef<T, C>...}
+\item \tcode{typeid<T,C>} may appear in same context as an instantiation of a pack expansion, as 14.5.3.7 \cite[N4296]{N4296}
+\item Encoding should be utf-8.
+\item Type names must be fully qualified, expanding all namespaces to avoid ambiguity if you will create a map of classes by name.
+\item Member names may not be qualified, we don't see the need for full namespaces into each member, that you already knows what class it belongs to, when you call \tcode{typeid<T>...};
+\item When passed an argument to \tcode{typeid<T>...}, it will transitively search until it find the definition of it in the code, to allow the following :
+\begin{codeblock}
+struct X {
+ int i;
+ int j;
+}
+
+template<class T>
+const char* foo(const T& t) {
+ return typeid<T>...;
+}
+
+void foo {
+ std::cout << foo(&X::i) << std::endl;
+ std::cout << foo(&X::j) << std::endl;
+}
+
+output:
+i
+j
+\end{codeblock}
+\end{enumerate}
+\rSec1[minimalist]{Minimalist and orthogonal}
+\begin{enumerate}
+\item This syntax received a big criticism on the forum, in favor to drop changes in keywords and use a as-if-lib approach, but it can't address ``not typed parameters'', unless we open some ``exception'' and break some rules and accepts namespaces in the place of the type parameter. However, forum comments must be carefully considered, and we decided to put some effort to address this issue. Consider the following code:
+\begin{codeblock}
+template<typename T>
+struct reflect {
+  ... private_member_function_types;
+  ... private_member_functions;
+  ... private_member_object_types;
+  ... private_member_objects;
+  ... public_member_function_types;
+  ... public_member_functions;
+  ... public_member_object_types;
+  ... public_member_objects;
+  ... base_classes;
+  ... private_base_classes;
+  ... public_base_classes;
+  ... virtual_base_classes;
+};
+\end{codeblock}
+It's a big interface, and still did not take virtual functions, abstract functions, constants, volatile, mutable, member classes, member enums, member typedefs, and so on... Instead of growing this class definition for each trait on the \texttt{<type_traits>} header, we pretend to use them directly. So even if as-lib proposal will be approved, it's better put some predicate on it.
+\item Other use for a parameter pack expansion is the possibility to maintain the order of members, allowing section idioms:
+\begin{codeblock}
+struct X {
+ int a;
+ int b;
+[[start_serialize]]
+ int i;
+ int j;
+ int k;
+ int get_ip(); 
+[[end_serialize]]
+};
+\end{codeblock}
+The above sample shows how define a serialize ``session'' in the class.
+\end{enumerate}
+\rSec1[constraints]{Constraints}
+\begin{enumerate}
+\item Template functions, template classes, constexpr function names and constexpr function objects and concepts may be passed as constraints.
+\item The way \tcode{typedef<T, C>...} expands C is as follows:
+\begin{codeblock}
+struct X {
+ int i;
+ int f(); 
+};
+\end{codeblock}
+The instruction \tcode{typedef<X, C>...} will check for a parametrized function call \tcode{ C(\&X::i) } and \tcode{ C(\&X::f) } if they don't exist, try \tcode{ C<decltype(\&X::i)>() } and \tcode{ C<decltype(\&X::f)>() } it they also don't exist, the instruction is ill formed. If it is well formed and the member evaluate to true, the member is retrieved.
+\end{enumerate}
+\rSec1[traits]{Type traits}
+\begin{enumerate}
+\item Many new type traits will be useful, like \tcode{is_virtual, is_friend, is_override, is_final, has_throws_specification, is_private, is_protected, is_public, etc}, some are defined in the session 7.
+\end{enumerate}
+\rSec1[access]{Private access}
+\begin{enumerate}
+\item We propose make the access accordingly to the normal rules of the language, if the reflector class is same or friend of the reflected class, \tcode{typedef<>...} have private access, if reflector class is descendent, it gets protected access, if other, just public access. Since one can choose via traits \tcode{is_private, is_protected, is_public}, it's possible to ask what you want. If the compiler finds a \tcode{is_private} or a \tcode{is_protected} among the constraints, then it overrides the default access.
+\item However, it's much more important to some serialization framework, the fact the member is tagged with some ``serialize'' attribute than if it's private or public.
+\begin{codeblock}
+class X {
+ [[serialize]] int a;
+ int b;
+public:
+ [[serialize]] int i;
+ int get_b();
+};
+\end{codeblock}
+\end{enumerate}
+\rSec1[compatibility]{Compatibility}
+\begin{enumerate}
+\item When new ``kinds'' of declarations, suppose ``member concepts'', become part of the language, they must be included in the domain of \tcode{typedef<>...}, to maintain backward compatibility, the use of a predicate C, in \tcode{typedef<T, C>...}, force the return to be exactly what you want. If you ask for \tcode{typedef<T, std:is\_member\_pointer>...} and some new feature is added to class definition, the return will change only if the semantics of \tcode{std::is\_member\_pointer} changes.
+\item Also, new features that are added in the type_traits, could be used in the reflection mechanism without any changes.
+\item It's also a intuition problem if the rules for \tcode{reflect<T>::member_function} are different from \tcode{std::is_member_function_pointer} a good way of ensure this is just making \tcode{std::is_member_function_pointer} part of the instruction.
+\end{enumerate}
+\rSec1[typedef.parameter]{T in \tcode{typedef<T,C>, typename<T,C> and typeid<T,C>} } 
+\begin{enumerate}
+\item T must be a template-argument of type or non-type, but cannot be a template.
+\item T is constexpr \tcode{typedef<T>...} must calculate it and return it's type and value;
+\item T is a member of enumeration it must return it's type and value:
+\begin{codeblock}
+enum E {
+  e1 = 0;
+  e2 = 2;
+};
+\end{codeblock}
+In this sample, \tcode{typedef<E::e2>...} should expand to a constant of type E, and value 2;
+\item T is a constant or a member constant \tcode{typedef<(int)4>...} should expand to a constant of type int and value 4;
+\item T is constant data member it return type must be a member-pointer type of member and return value must be a pointer to that member-typed constant;
+\item \tcode{typedef<const/volatile/\& T>...} and their combinations, must have the same result as \tcode{typedef<T>...}
+\item T can be a lambda type \tcode{typedef<decltype([](int i)->int \{ return i+1; \} )>...}.
+\begin{itemize}
+\item The standard says that the lambda must have a function call operator, but not where.
+\item The lambdas may contain more member functions and member objects, and also the order of implementation is not defined in the standard.
+\item The solution is via type_traits, one can define a new type trait \tcode{std::is_function_call_operator} constraint that brings you the expected operator.
+\item Otherwise the behavior of \tcode{typedef<lambda>} is undefined.
+\begin{codeblock}
+namespace std {
+ template<typename T>
+ constexpr is_function_call_operator() {...} 
+}
+
+void foo() {
+ auto lamb = []() -> int { return 7; };
+ auto tuple = make_tuple( typedef<decltype(lamb), is_function_call_operator>... );
+ auto ptr = std::get<0>(tuple);
+ lamb.*ptr(1);
+}
+\end{codeblock}
+\end{itemize}
+\item T can also be a namespace;
+\end{enumerate}
+
+\rSec1[typename.parameter]{T in \tcode{typename<T,C> and typeid<T,C>} }.
+Here we explore arguments that are not be accepted in \tcode{typedef<T,C>...}. 
+\begin{enumerate}
+\item T can be a function pointer or a member function pointer, possibly a returned element of \tcode{typedef<T,C>}. 
+\item T can be primary types, in this case \tcode{typename<T,C>} get cast operators, operators and constructors.
+\end{enumerate}

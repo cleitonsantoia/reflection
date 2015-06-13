@@ -1,0 +1,33 @@
+\rSec0[impact]{Impact on Standard}
+\rSec1[impact.reflect]{Impact of reflection}
+\begin{enumerate}
+\item This is a proposal of compile time reflection, strongly typed, using the variadic template expansion;
+\item \tcode{typename<T, C>...}, \tcode{typedef<T, C>...} and \tcode{typeid<T, C>...} will be new ways to use existing keywords, that are not used today, only \tcode{typename type}, \tcode{typedef type id} and \tcode{typeid(typeid)} are used in C++14;
+\item The expansion of \tcode{typedef<T, C>...} and \tcode{typeid<T, C>...} may appear in the source code as a constant expression-list, and a single const-expression, if the result is only one element.
+\item The expansion of \tcode{typename<T, C>...} may appear in the source code as a type parameter pack expansion.
+\item Allow typed attributes.
+\item To allow a terse use of type traits \tcode{typedef<T, is_enum>...}, they must implement some function call operator as follows.
+\begin{codeblock}
+template<>
+struct is_class<void> {
+ template<typename T>
+ constexpr bool operator() const noexcept {
+   return is_class<T>();
+ }
+};
+\end{codeblock}
+\end{enumerate}
+
+\rSec1[impact.attributes]{Impact of attributes}
+In order to take a little more controlled environment we pretend to forbid few things.
+\begin{enumerate}
+\item Forbid attributes to be keywords: today, none of the standard attributes are keywords \emph{alignas, noreturn, carries\_dependency and deprecated}, so it still in time. Also, they need to participate of the name look-up, just as a common types and instantiated as constexpr.
+\item \Cpp attributes allows compiler implementers to define their custom features that does not need to be standardized, so we must keep this use. To allow this and avoid break old code and allow attributes to be typed we propose the following :
+\begin{itemize}
+\item First, make all attributes typed, for standard defined attributes like \tcode{[[deprecated]]} we propose to define their type as a common class or structure;
+\item The implementers can put typed attributes in a non-standard attribute-namespace. \enterexample GNU may create \tcode{gcc::attribute} namespace to put \tcode{gnu\_inline} attribute class. \exitexample
+\item Implementers will be free to add an implicit \tcode{using gcc::attribute} to any attribute lookup to make their attributes work as typed and not break old code.
+\end{itemize}
+This will help the migration from non-typed do typed attributes.
+\end{enumerate}
+

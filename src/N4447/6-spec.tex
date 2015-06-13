@@ -1,0 +1,39 @@
+\rSec0[spec]{Technical Specification}
+\begin{enumerate}
+\item Attempted wording for \tcode {typedef<T>}
+
+\begin{bnf}
+\added{\nontermdef{reflective-element}\br
+    type-expression: \br
+    constant-expression: \br
+    namespace-name: \br}
+\end{bnf}
+
+\begin{bnf}
+\added{\nontermdef{reflective-constraint}\br
+    function-template: \br
+    class-template: \br
+    constant-expression: \br}
+\end{bnf}
+
+\begin{bnf}
+\added{\nontermdef{reflective-typedef}\br
+    \terminal{typedef<}reflective-element: \terminal{,} reflective-constraint\opt \terminal{>...} \br}
+\end{bnf}
+
+\begin{bnf}
+\nontermdef{initializer-list}\br
+    \added{reflective-typedef:} \br\br
+\end{bnf}
+
+\begin{bnf}
+\nontermdef{postfix-expression}\br
+    \added{reflective-typedef:} \br\br
+\enternote \grammarterm{postfix-expression:} is allowed when \grammarterm{reflect-pack:} has only one element
+\exitnote
+\end{bnf}
+
+\item Grammar for \tcode {typedef<T>}
+
+
+\end{enumerate}
